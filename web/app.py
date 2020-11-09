@@ -4,18 +4,46 @@ from pymongo import MongoClient
 import bcrypt
 import requests
 import subprocess
-import jsonify
 
 app = Flask(__name__)
 api = Api(app)
 
-client = MongoClient("mongodb://db:27017")
-db = client.ImageRecognition
+client = MongoClient("mongodb://db:27017") #, username='user', password='password')
+db = client.IDVerification
 users = db["Users"]
 
+def InitizeDatabase():
+
+    password = u"test"
+    hashed_pw = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
+
+    users_list = [
+        {
+            "username": 'mindy_kaling',
+            "password": hashed_pw
+        },
+        {
+            'username': 'madonna',
+            "password": hashed_pw
+        },
+        {
+            'username': 'elton_john',
+            "password": hashed_pw
+        },
+        {
+            'username': 'ben_afflek',
+            "password": hashed_pw
+        },
+        {
+            'username': 'jerry_seinfeld',
+            "password": hashed_pw
+        }
+    ]
+
+    users.insert_many(users_list)
 
 def UserExist(username):
-    if users.find({"Username": username}).count()==0:
+    if users.find({"username": username}).count()==0:
         return False
     else:
         return True
@@ -25,8 +53,8 @@ def verify_pw(username, password):
         return False
 
     hashed_pw = users.find({
-        "Username": username
-    })[0]["Password"]
+        "username": username
+    })[0]["password"]
 
     if bcrypt.hashpw(password.encode('utf8'), hashed_pw)==hashed_pw:
         return True
@@ -65,11 +93,11 @@ class Register(Resource):
             }
             return jsonify(retJson)
 
-        hashed_pw = bcrypt.hashed_pw(password.encode(utf8), bcrypt.gensalt())
+        hashed_pw = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
 
         users.insert_one({
-            "Username": username,
-            "Password": hashed_pw,
+            "username": username,
+            "password": hashed_pw,
             "Tokens": 4
         })
 
@@ -99,5 +127,11 @@ class SignIn(Resource):
 api.add_resource(Register, "/register")
 api.add_resource(SignIn, "/sign_in")
 
-if name == "__main__":
+
+@app.route('/')
+def welcome():
+    return 'Welcome to the API for the ID verification service. You first need to register with /register'
+
+if __name__ == "__main__":
+    InitizeDatabase()
     app.run(host='0.0.0.0')
