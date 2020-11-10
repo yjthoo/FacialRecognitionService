@@ -84,7 +84,6 @@ class Register(Resource):
         users.insert_one({
             "username": username,
             "password": hashed_pw,
-            "Tokens": 4
         })
 
         retJson = {
