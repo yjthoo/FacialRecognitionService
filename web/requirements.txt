@@ -7,3 +7,4 @@ tensorflow
 requests
 opencv-python
 mtcnn
+pandas

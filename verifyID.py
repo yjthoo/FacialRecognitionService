@@ -44,3 +44,11 @@ def get_embedding(model, face_pixels):
     # make prediction to get embedding
     yhat = model.predict(samples)
     return yhat[0]
+
+# check if the embeddings have a high similarity or not
+def verifyID(ref_img, cap_img, threshold = 0.5):
+
+    if np.linalg.norm(ref_img - cap_img) < threshold:
+        return True
+
+    return False

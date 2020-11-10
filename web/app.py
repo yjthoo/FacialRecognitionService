@@ -4,43 +4,29 @@ from pymongo import MongoClient
 import bcrypt
 import requests
 import subprocess
+import pandas as pd
+import numpy as np
 
 app = Flask(__name__)
 api = Api(app)
 
-client = MongoClient("mongodb://db:27017") #, username='user', password='password')
+client = MongoClient("mongodb://db:27017")
 db = client.IDVerification
 users = db["Users"]
 
 def InitizeDatabase():
 
-    password = u"test"
+    # password is only used for the purposes of testing
+    password = u"test123"
     hashed_pw = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
 
-    users_list = [
-        {
-            "username": 'mindy_kaling',
-            "password": hashed_pw
-        },
-        {
-            'username': 'madonna',
-            "password": hashed_pw
-        },
-        {
-            'username': 'elton_john',
-            "password": hashed_pw
-        },
-        {
-            'username': 'ben_afflek',
-            "password": hashed_pw
-        },
-        {
-            'username': 'jerry_seinfeld',
-            "password": hashed_pw
-        }
-    ]
+    # load saved embeddings
+    db_init = pd.read_csv('data/db_init.csv')
 
-    users.insert_many(users_list)
+    # add the password feature (dev purposes only)
+    db_init["password"] = hashed_pw
+
+    users.insert_many(db_init.to_dict(orient='records'))
 
 def UserExist(username):
     if users.find({"username": username}).count()==0:
