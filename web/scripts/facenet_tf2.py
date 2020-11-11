@@ -1,5 +1,5 @@
 import tensorflow as tf
-from utils import LRN2D, conv2d_bn
+from scripts.utils import LRN2D, conv2d_bn
 
 def facenet_tf2():
 

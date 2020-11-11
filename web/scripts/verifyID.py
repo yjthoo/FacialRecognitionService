@@ -1,15 +1,13 @@
 # function for face detection with mtcnn
-from PIL import Image
 import numpy as np
-from mtcnn.mtcnn import MTCNN
 from numpy import expand_dims
+import cv2
+from PIL import Image
+from mtcnn.mtcnn import MTCNN
 
 # extract a single face from a given photograph
-def extract_face(filename, required_size=(96, 96)):
-    # load image from file
-    image = Image.open(filename)
-    # convert to RGB, if needed
-    image = image.convert('RGB')
+def extract_face(image, debug = False, required_size=(96, 96)):
+
     # convert to array
     pixels = np.asarray(image)
     # create the detector, using default weights
@@ -31,7 +29,6 @@ def extract_face(filename, required_size=(96, 96)):
 
 # get the face embedding for one face
 def get_embedding(model, face_pixels):
-
     # scale pixel values
     face_pixels = face_pixels.astype('float32')
     # standardize pixel values across channels (global)
@@ -45,10 +42,24 @@ def get_embedding(model, face_pixels):
     yhat = model.predict(samples)
     return yhat[0]
 
-# check if the embeddings have a high similarity or not
-def verifyID(ref_img, cap_img, threshold = 0.5):
+# obtain and save the embeddings of a new user
+def storeUserEmbedding(model, frame, username):
 
-    if np.linalg.norm(ref_img - cap_img) < threshold:
+    cap_face = extract_face(frame)
+    cap_emb = get_embedding(model, cap_face)
+
+    filename = "../data/" + username + ".npy"
+    np.save(filename, cap_emb)
+    return filename
+
+# check if the embeddings have a high similarity or not
+def verifyID(model, frame, ref_path, threshold = 0.5):
+
+    cap_face = extract_face(frame)
+    cap_emb = get_embedding(model, cap_face)
+    ref_emb = np.load(ref_path, allow_pickle = True)
+
+    if np.linalg.norm(ref_emb - cap_emb) < threshold:
         return True
 
     return False
