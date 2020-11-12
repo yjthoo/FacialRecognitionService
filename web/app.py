@@ -7,7 +7,7 @@ import bcrypt
 import pandas as pd
 import numpy as np
 from scripts.facenet_tf2 import facenet_tf2
-from scripts.verifyID import extract_face, verifyID, get_embedding
+from scripts.verifyID import extract_face, verifyID, get_embedding, storeUserEmbedding
 import cv2
 import os, random
 from PIL import Image
@@ -162,7 +162,7 @@ class SignIn(Resource):
             return jsonify(retJson)
 
         image = get_photo(debug, username)
-        verifyID(model, image, "data/" + username + ".npy")
+        #verifyID(model, image, "data/" + username + ".npy")
 
         return jsonify(generateReturnDictionnary(200, "In the sign in"))
 

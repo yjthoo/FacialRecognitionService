@@ -48,7 +48,7 @@ def storeUserEmbedding(model, frame, username):
     cap_face = extract_face(frame)
     cap_emb = get_embedding(model, cap_face)
 
-    filename = "../data/" + username + ".npy"
+    filename = "data/" + username + ".npy"
     np.save(filename, cap_emb)
     return filename
 

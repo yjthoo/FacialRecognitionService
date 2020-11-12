@@ -11,7 +11,11 @@ services:
     # https://gist.github.com/enric1994/7ab05985f775cb2954de6c30b72b07f9
     devices:
       - /dev/video0:/dev/video0
+      # https://blog.jessfraz.com/post/docker-containers-on-the-desktop/
+      #- /dev/snd \ # so we have sound
     environment:
-      - DISPLAY=unix$DISPLAY
+      - DISPLAY=unix:0 #DISPLAY=unix$DISPLAY
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
   db:
     build: ./db
