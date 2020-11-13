@@ -25,3 +25,12 @@ def conv2d_bn(x,layer=None, cv1_out=None, cv1_filter=(1, 1), cv1_strides=(1, 1),
     tensor = tf.keras.layers.Activation('relu')(tensor)
 
     return tensor
+
+#https://stackoverflow.com/questions/21732123/convert-true-false-value-read-from-file-to-boolean?lq=1
+def str_to_bool(s):
+    if s == 'true':
+         return True
+    elif s == 'false':
+         return False
+    else:
+         raise ValueError # evil ValueError that doesn't tell you what the wrong value was

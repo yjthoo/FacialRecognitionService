@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 from scripts.facenet_tf2 import facenet_tf2
 from scripts.verifyID import extract_face, verifyID, get_embedding, storeUserEmbedding
+from scripts.utils import str_to_bool
 import cv2
 import os, random
 from PIL import Image
@@ -25,35 +26,31 @@ model = facenet_tf2()
 model.load_weights('weights/nn4.small2.v1.h5')
 
 
-#https://stackoverflow.com/questions/21732123/convert-true-false-value-read-from-file-to-boolean?lq=1
-def str_to_bool(s):
-    if s == 'true':
-         return True
-    elif s == 'false':
-         return False
-    else:
-         raise ValueError # evil ValueError that doesn't tell you what the wrong value was
-
-def get_photo(debug, username):
-
-    frame = None
+def get_photo(debug, username, window_name):
 
     if not debug:
+
         # get photo via webcam
         video_capture = cv2.VideoCapture(0)
+
+        if not video_capture.isOpened():
+            video_capture.open(0)
+
         while True:
             _, frame = video_capture.read()
-            cv2.imshow('Webcam', frame)
+            cv2.imshow(window_name, frame)
 
             # https://stackoverflow.com/questions/35372700/whats-0xff-for-in-cv2-waitkey1
             # https://stackoverflow.com/questions/14494101/using-other-keys-for-the-waitkey-function-of-opencv/33555071#33555071
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
         video_capture.release()
-        cv2.destroyAllWindows()
+        #cv2.destroyAllWindows()
+        cv2.destroyWindow(window_name)
 
         # convert color space from BGR to RGB
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
     else:
         # get photo from folder
         filename = "images/" + username + "/" + random.choice(os.listdir("images/" + username + "/"))
@@ -132,7 +129,7 @@ class Register(Resource):
 
         hashed_pw = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
 
-        image = get_photo(debug, username)
+        image = get_photo(debug, username, 'Register')
         filename = storeUserEmbedding(model, image, username)
 
         users.insert_one({
@@ -141,11 +138,7 @@ class Register(Resource):
             "embedding": filename
         })
 
-        retJson = {
-            "status": 200,
-            "msg": "you are registered"
-        }
-        return jsonify(retJson)
+        return jsonify(generateReturnDictionnary(200, "You are registered"))
 
 class SignIn(Resource):
     def post(self):
@@ -161,10 +154,10 @@ class SignIn(Resource):
         if invalidPw:
             return jsonify(retJson)
 
-        image = get_photo(debug, username)
-        #verifyID(model, image, "data/" + username + ".npy")
+        image = get_photo(debug, username, "Sign In")
+        verifyID(model, image, "data/" + username + ".npy")
 
-        return jsonify(generateReturnDictionnary(200, "In the sign in"))
+        return jsonify(generateReturnDictionnary(200, "Sign in successful"))
 
 
 api.add_resource(Register, "/register")
